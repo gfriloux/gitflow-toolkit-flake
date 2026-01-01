@@ -6,7 +6,7 @@
 
 Ajouter notre dépôt en inputs:
 ```
-sshtui = {
+gitflow-toolkit = {
   url = "github:gfriloux/gitflow-toolkit-flake";
   inputs.nixpkgs.follows = "nixpkgs";
 };
