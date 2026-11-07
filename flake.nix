@@ -1,29 +1,25 @@
 {
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    snowfall-lib = {
-      url = "github:snowfallorg/lib";
-      inputs.nixpkgs.follows = "nixpkgs";
+  outputs = {
+    self,
+    nixpkgs,
+  }: let
+    systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+    forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
+  in {
+    packages = forAllSystems (pkgs: rec {
+      gitflow-toolkit = pkgs.callPackage ./package.nix {};
+      default = gitflow-toolkit;
+    });
+
+    overlays.default = final: _prev: {
+      gitflow-toolkit = self.packages.${final.stdenv.hostPlatform.system}.gitflow-toolkit;
     };
 
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+    homeModules = rec {
+      gitflow-toolkit = import ./module.nix self;
+      default = gitflow-toolkit;
     };
   };
-  outputs = inputs:
-    inputs.snowfall-lib.mkFlake {
-      inherit inputs;
-      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      src = ./.;
-
-      snowfall = {
-        namespace = "gitflow-toolkit";
-      };
-      alias = {
-        packages.default = "gitflow-toolkit";
-      };
-    };
-
 }

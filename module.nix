@@ -1,4 +1,6 @@
-{ config, lib, pkgs, ... }:
+# `self` is this flake: the package defaults to its own build, with no overlay
+# required from the consumer.
+self: { config, lib, pkgs, ... }:
 let
   cfg = config.programs.gitflow-toolkit;
 in
@@ -8,7 +10,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.gitflow-toolkit;
+      default = self.packages.${pkgs.stdenv.hostPlatform.system}.gitflow-toolkit;
       description = "gitflow-toolkit package to use";
     };
   };
